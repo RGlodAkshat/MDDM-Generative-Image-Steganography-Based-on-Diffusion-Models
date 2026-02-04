@@ -1,0 +1,17 @@
+﻿# Python / env
+mddm_env/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Outputs
+*.png
+*.jpg
+*.jpeg
+
+# Local data / artifacts
+mddm_extracted.txt
+10075_MDDM_Practical_Message_D.pdf
+
+# HF cache (optional)
+.cache/
