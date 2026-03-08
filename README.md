@@ -15,6 +15,43 @@ The repository contains:
 - a FastAPI backend for API-based generation/decoding,
 - a Next.js frontend for interactive demonstrations.
 
+## Running Instructions
+### 1. Environment Setup
+Use Python 3.10 for backend compatibility.
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+```
+
+### 2. Backend Setup and Run
+From project root:
+
+```bash
+cd backend
+pip install -r requirements.txt
+cd ..
+uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 3. Frontend Setup and Run
+In a separate terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend runs on `http://localhost:3000` and communicates with backend REST endpoints (`http://localhost:8000` by default).
+
+### 4. Running the Notebook
+Open `model.ipynb` in Jupyter/VS Code and run top-to-bottom for full reproduction.
+
+GPU note:
+- Stable Diffusion generation/inversion is practical with CUDA GPU.
+- CPU mode works but can be very slow (minutes per generation/inversion run).
+
 ## Overview of MDDM
 Diffusion models synthesize images by gradually denoising latent noise into a final image.
 
@@ -132,43 +169,6 @@ The web demo provides an interactive way to showcase the method and evaluation i
 
 - **About / Method**  
   Concise explanation of MDDM mechanism and evaluation metrics.
-
-## Running Instructions
-### 1. Environment Setup
-Use Python 3.10 for backend compatibility.
-
-```bash
-python -m venv .venv
-source .venv/Scripts/activate
-```
-
-### 2. Backend Setup and Run
-From project root:
-
-```bash
-cd backend
-pip install -r requirements.txt
-cd ..
-uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 3. Frontend Setup and Run
-In a separate terminal:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend runs on `http://localhost:3000` and communicates with backend REST endpoints (`http://localhost:8000` by default).
-
-### 4. Running the Notebook
-Open `model.ipynb` in Jupyter/VS Code and run top-to-bottom for full reproduction.
-
-GPU note:
-- Stable Diffusion generation/inversion is practical with CUDA GPU.
-- CPU mode works but can be very slow (minutes per generation/inversion run).
 
 ## Key Achievements
 - Implemented a complete end-to-end MDDM steganography pipeline.
