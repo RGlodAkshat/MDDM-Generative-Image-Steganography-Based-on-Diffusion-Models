@@ -8,10 +8,23 @@ __pycache__/
 *.png
 *.jpg
 *.jpeg
+*.gif
+*.webp
 
 # Local data / artifacts
 mddm_extracted.txt
 10075_MDDM_Practical_Message_D.pdf
+IE663 2026 Course Project Midterm Assessment Instructions.pdf
+IE663 Timeline Student Sheet.xlsx
+IE663_2026_Report_template/
+
+# Local app/runtime artifacts
+backend/.venv/
+backend/data/
+backend/__pycache__/
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
 
 # HF cache (optional)
 .cache/
