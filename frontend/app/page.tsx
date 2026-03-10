@@ -44,7 +44,7 @@ export default function Page() {
         {TABS.map((tab) => (
           <button
             key={tab}
-            className={active === tab ? "btn-primary" : "btn-secondary"}
+            className={active === tab ? "tab-btn tab-btn-active" : "tab-btn"}
             onClick={() => setActive(tab)}
           >
             {tab}
@@ -53,8 +53,8 @@ export default function Page() {
       </nav>
 
       {latestImageId ? (
-        <div className="text-xs text-slate-500">
-          Latest image ID: <span className="font-mono">{latestImageId}</span>
+        <div className="card px-3 py-2 text-xs text-slate-300">
+          Latest image ID: <span className="font-mono text-blue-200">{latestImageId}</span>
         </div>
       ) : null}
 

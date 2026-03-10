@@ -1,4 +1,20 @@
-export type ECCMode = "none" | "rep3";
+export type ECCMode = "none" | "rep3" | "hamming74";
+export type ExecutionMode = "demo" | "custom";
+
+export type DemoPreset = {
+  id: string;
+  section: "encode_decode" | "diversity" | "tamper" | "provenance";
+  title: string;
+  subtitle: string;
+  description: string;
+  asset_dir?: string;
+  inputs: Record<string, unknown>;
+};
+
+export type DemoPresetsResponse = {
+  section?: string;
+  presets: DemoPreset[] | Record<string, DemoPreset[]>;
+};
 
 export type MetricsPayload = {
   recovered_message: string;

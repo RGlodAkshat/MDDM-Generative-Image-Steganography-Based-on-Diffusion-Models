@@ -79,12 +79,64 @@ def ecc_decode_repetition(bits: Iterable[int], rep: int = 3, original_len: int |
     return decoded, {"scheme": f"rep{rep}", "corrected_groups": corrected, "usable_bits": usable}
 
 
+def ecc_encode_hamming74(bits: Iterable[int]) -> Tuple[List[int], Dict[str, int | str]]:
+    base = to_bit_list(bits)
+    out: List[int] = []
+    padded = 0
+    for i in range(0, len(base), 4):
+        block = base[i:i + 4]
+        if len(block) < 4:
+            padded = 4 - len(block)
+            block = block + [0] * padded
+        d1, d2, d3, d4 = block
+        p1 = d1 ^ d2 ^ d4
+        p2 = d1 ^ d3 ^ d4
+        p3 = d2 ^ d3 ^ d4
+        out.extend([p1, p2, d1, p3, d2, d3, d4])
+    return out, {
+        "scheme": "hamming74",
+        "input_len": len(base),
+        "encoded_len": len(out),
+        "padded_bits": padded,
+    }
+
+
+def ecc_decode_hamming74(bits: Iterable[int], original_len: int | None = None) -> Tuple[List[int], Dict[str, int | str]]:
+    arr = to_bit_list(bits)
+    usable = (len(arr) // 7) * 7
+    arr = arr[:usable]
+    decoded: List[int] = []
+    corrected = 0
+
+    for i in range(0, usable, 7):
+        b = arr[i:i + 7]
+        s1 = b[0] ^ b[2] ^ b[4] ^ b[6]
+        s2 = b[1] ^ b[2] ^ b[5] ^ b[6]
+        s3 = b[3] ^ b[4] ^ b[5] ^ b[6]
+        err_pos = s1 + (s2 << 1) + (s3 << 2)
+        if 1 <= err_pos <= 7:
+            b[err_pos - 1] ^= 1
+            corrected += 1
+        decoded.extend([b[2], b[4], b[5], b[6]])
+
+    if original_len is not None:
+        decoded = decoded[:original_len]
+
+    return decoded, {
+        "scheme": "hamming74",
+        "usable_bits": usable,
+        "corrected_blocks": corrected,
+    }
+
+
 def ecc_encode(bits: Iterable[int], mode: str = "none") -> Tuple[List[int], Dict[str, int | str]]:
     if mode == "none":
         base = to_bit_list(bits)
         return base, {"scheme": "none", "input_len": len(base), "encoded_len": len(base)}
     if mode == "rep3":
         return ecc_encode_repetition(bits, rep=3)
+    if mode == "hamming74":
+        return ecc_encode_hamming74(bits)
     raise ValueError(f"Unsupported ECC mode: {mode}")
 
 
@@ -96,4 +148,6 @@ def ecc_decode(bits: Iterable[int], mode: str = "none", original_len: int | None
         return base, {"scheme": "none", "usable_bits": len(base)}
     if mode == "rep3":
         return ecc_decode_repetition(bits, rep=3, original_len=original_len)
+    if mode == "hamming74":
+        return ecc_decode_hamming74(bits, original_len=original_len)
     raise ValueError(f"Unsupported ECC mode: {mode}")

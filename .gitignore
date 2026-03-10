@@ -10,6 +10,10 @@ __pycache__/
 *.jpeg
 *.gif
 *.webp
+!backend/demo_assets/
+!backend/demo_assets/**/*.png
+!backend/demo_assets/**/*.jpg
+!backend/demo_assets/**/*.jpeg
 
 # Local data / artifacts
 mddm_extracted.txt

@@ -1,6 +1,7 @@
 import type {
   AttackDecodeResponse,
   CompareResponse,
+  DemoPresetsResponse,
   DecodeProvenanceResponse,
   DecodeResponse,
   GenerateResponse,
@@ -34,6 +35,9 @@ export function imageUrl(path: string): string {
 
 export const api = {
   health: () => request<{ status: string; device: string; model_loaded: boolean; model_id: string }>("/health"),
+
+  demoPresets: (section?: "encode_decode" | "diversity" | "tamper" | "provenance") =>
+    request<DemoPresetsResponse>(section ? `/demo-presets?section=${section}` : "/demo-presets"),
 
   generate: (body: Record<string, unknown>) =>
     request<GenerateResponse>("/generate", {

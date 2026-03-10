@@ -1,0 +1,367 @@
+# 1. Noise Distribution Validation
+
+## Experiment Goal
+
+Verify that the **latent noise distribution after embedding still follows a standard Gaussian distribution**, which is critical because diffusion models assume the latent follows ( N(0,1) ).
+
+## Observed Results
+
+Latent statistics:
+
+* Latent shape: **[1, 4, 64, 64]**
+* Mean: **0.0008197**
+* Variance: **0.9905336**
+
+The histogram of encoded latent values closely follows the theoretical **(N(0,1))** probability density curve.
+
+## Interpretation
+
+The embedding strategy **does not distort the overall latent distribution**.
+Even after inserting payload bits into selected latent positions using truncated Gaussian tails, the **global statistics remain nearly identical to the expected diffusion prior**.
+
+## Key Insight
+
+This confirms that:
+
+* The embedding process remains **statistically stealthy**
+* The diffusion model can still **generate realistic images**
+* The payload embedding does not introduce detectable distribution shifts
+
+This property is important for **steganographic security**, because large deviations in noise statistics could reveal the presence of hidden data.
+
+---
+
+# 2. Message vs Non-Message Latent Distribution
+
+## Experiment Goal
+
+Compare the noise distribution at:
+
+* **payload embedding positions (Cardan grille indices)**
+* **non-payload positions**
+
+## Observed Pattern
+
+The plot shows:
+
+* **Message positions** are pushed into **extreme Gaussian tails**
+* **Non-message positions** remain centered around zero
+
+This separation clearly distinguishes:
+
+* payload-carrying latent values
+* normal diffusion latent values
+
+## Interpretation
+
+Embedding is achieved by pushing payload bits into **tail regions of the Gaussian distribution**.
+
+This preserves the **overall noise distribution** while still encoding recoverable information.
+
+The key property here is **localized distribution modification**, rather than global distortion.
+
+---
+
+# 3. Tail Separation for Bit Encoding
+
+## Experiment Goal
+
+Validate that **bit values are encoded using opposite Gaussian tails**.
+
+Encoding scheme:
+
+* **bit = 0 → negative tail**
+* **bit = 1 → positive tail**
+
+## Observed Results
+
+Bit distribution means:
+
+* bit=0 mean: **−2.78075**
+* bit=1 mean: **2.86259**
+
+## Interpretation
+
+These means lie well beyond the threshold region (k ≈ 2.5), meaning:
+
+* encoded values are strongly separated
+* bit classification becomes very reliable
+
+This large separation ensures that even after diffusion generation and inversion, the sign of recovered values remains stable.
+
+## Key Insight
+
+Tail separation makes **sign-based decoding robust**.
+
+Because:
+
+[
+\text{bit} = sign(x_T)
+]
+
+This is the fundamental mechanism enabling payload recovery.
+
+---
+
+# 4. Latent Recovery After DDIM Inversion
+
+## Experiment Goal
+
+Verify whether **DDIM inversion successfully reconstructs the original latent noise** used during generation.
+
+## Observed Statistics
+
+Original latent:
+
+* Mean = **0.0008197**
+* Variance = **0.9905336**
+
+Recovered latent:
+
+* Mean = **−0.0008383**
+* Variance = **0.9775391**
+
+## Scatter Plot Analysis
+
+The scatter plot comparing **original vs recovered latent values** shows two clear clusters:
+
+* negative cluster for bit=0
+* positive cluster for bit=1
+
+## Error Histogram
+
+Absolute error distribution shows:
+
+* most errors are **very small (< 0.5)**
+* few larger deviations
+
+## Sign Consistency
+
+Sign consistency at Cardan grille indices:
+
+**1.0 (100%)**
+
+## Interpretation
+
+Even though inversion introduces small numeric errors, **sign preservation remains perfect**.
+
+Since decoding depends only on sign, not magnitude, payload recovery remains extremely reliable.
+
+---
+
+# 5. ECC Overhead Analysis
+
+## Purpose
+
+Evaluate the trade-off between **payload redundancy and robustness**.
+
+## Results
+
+| ECC Mode     | Original Bits | Encoded Bits | Redundancy Ratio | Overhead |
+| ------------ | ------------- | ------------ | ---------------- | -------- |
+| None         | 200           | 200          | 1.0              | 0%       |
+| Rep3         | 200           | 600          | 3.0              | 200%     |
+| Hamming(7,4) | 200           | 350          | 1.75             | 75%      |
+
+## Interpretation
+
+ECC increases robustness by adding redundancy.
+
+However, this reduces payload capacity.
+
+Tradeoff:
+
+* **Higher redundancy → stronger error correction**
+* **Lower capacity**
+
+---
+
+# 6. Clean-Case ECC Validation
+
+## Experiment Goal
+
+Verify that ECC does not degrade recovery under ideal conditions.
+
+## Results
+
+| Mode | Payload Bits | BER | Bit Accuracy |
+| ---- | ------------ | --- | ------------ |
+| None | 200          | 0.0 | 1.0          |
+| Rep3 | 200          | 0.0 | 1.0          |
+
+Recovered text in both cases:
+
+**“MDDM demo: hidden message”**
+
+## Interpretation
+
+ECC does not affect decoding accuracy when no distortions are present.
+
+It only provides additional protection when distortions occur.
+
+---
+
+# 7. ECC Robustness Under Distortion
+
+## Experiment
+
+Apply distortions and compare decoding performance.
+
+### Without ECC
+
+| Distortion  | BER       | Errors |
+| ----------- | --------- | ------ |
+| clean       | 0.0       | 0      |
+| jpeg_q60    | **0.035** | 7      |
+| blur_r1.0   | 0.0       | 0      |
+| resize_0.75 | 0.0       | 0      |
+
+### With Rep3 ECC
+
+| Distortion  | BER       | Errors |
+| ----------- | --------- | ------ |
+| clean       | 0.0       | 0      |
+| jpeg_q60    | **0.005** | 1      |
+| blur_r1.0   | 0.0       | 0      |
+| resize_0.75 | 0.0       | 0      |
+
+## Interpretation
+
+ECC dramatically improves robustness.
+
+Example:
+
+JPEG compression:
+
+* BER reduced from **0.035 → 0.005**
+* errors reduced from **7 → 1**
+
+This shows ECC can **correct many bit errors introduced by image distortions**.
+
+---
+
+# 8. Payload Capacity vs Accuracy
+
+## Results
+
+| Payload | Accuracy | BER     |
+| ------- | -------- | ------- |
+| 64      | 1.000    | 0       |
+| 128     | 1.000    | 0       |
+| 256     | 1.000    | 0       |
+| 512     | 0.992    | 0.0078  |
+| 1024    | 0.999    | 0.00098 |
+| 2048    | 0.9995   | 0.00049 |
+
+## Interpretation
+
+Small payloads are **perfectly recoverable**.
+
+As payload increases:
+
+* bit errors begin appearing
+* BER increases slightly
+
+However, recovery remains **very high accuracy (>99%)** even at large payloads.
+
+---
+
+# 9. Robustness Stress Test
+
+## Results
+
+| Attack         | Accuracy | BER       |
+| -------------- | -------- | --------- |
+| rotation 3°    | 0.566    | **0.433** |
+| jpeg q50       | 0.992    | 0.0078    |
+| occlusion 10%  | 0.994    | 0.0058    |
+| brightness 1.2 | 0.994    | 0.0058    |
+| contrast 1.25  | 0.998    | 0.00195   |
+| jpeg q75       | 0.998    | 0.00195   |
+| blur           | 1.0      | 0         |
+| resize         | 1.0      | 0         |
+
+## Interpretation
+
+Rotation is the most destructive distortion.
+
+Other distortions have **minor impact**.
+
+This indicates MDDM is robust to many photometric changes but sensitive to **geometric transformations**.
+
+---
+
+# 10. Prompt / Seed Diversity
+
+## Results
+
+Mean bit accuracy:
+
+**0.998333**
+
+Exact recovery cases:
+
+**4 out of 6**
+
+Minor errors:
+
+* 1 bit error in two cases
+
+## Interpretation
+
+This demonstrates **payload-image decoupling**.
+
+The same hidden payload can be embedded and recovered across visually different generations.
+
+---
+
+# 11. Inversion Sensitivity
+
+## Results
+
+| Condition      | BER    |
+| -------------- | ------ |
+| correct prompt | 0      |
+| blank prompt   | 0      |
+| steps 20       | 0      |
+| steps 50       | 0      |
+| wrong prompt   | 0.0039 |
+
+## Interpretation
+
+Decoding is **robust to many inversion settings**.
+
+However, using an incorrect prompt introduces small errors.
+
+---
+
+# 12. Runtime Benchmark
+
+## Average Runtime
+
+| Stage      | Time     |
+| ---------- | -------- |
+| Embedding  | 0.005 s  |
+| Generation | 6.19 s   |
+| Inversion  | 6.03 s   |
+| Decoding   | 0.0005 s |
+
+## Interpretation
+
+Diffusion generation and inversion dominate runtime.
+
+Embedding and decoding are computationally negligible.
+
+---
+
+# Final Result Summary
+
+Overall, the experiments demonstrate that:
+
+* MDDM successfully embeds hidden payloads in diffusion images
+* Payload recovery achieves **perfect accuracy under clean conditions**
+* ECC significantly improves robustness against distortions
+* The same payload can be embedded in visually different images
+* Most distortions cause minimal errors except geometric rotations
+* Generation and inversion dominate computational cost
+

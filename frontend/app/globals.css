@@ -3,49 +3,98 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  @apply text-slate-900;
+  @apply text-slate-100;
   background:
-    radial-gradient(circle at 10% 0%, #e6f0ff 0%, transparent 35%),
-    radial-gradient(circle at 90% 10%, #f0f9ff 0%, transparent 30%),
-    #f8fafc;
+    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 30%),
+    radial-gradient(circle at 85% 5%, rgba(34, 197, 94, 0.12) 0%, transparent 28%),
+    linear-gradient(145deg, #0f172a 0%, #111827 45%, #0b1220 100%);
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.4);
+  color: #f8fafc;
 }
 
 .card {
-  @apply rounded-xl border border-slate-200 bg-white/95 shadow-sm;
+  @apply rounded-2xl border border-slate-700/80 bg-slate-800/70 shadow-[0_12px_42px_rgba(2,6,23,0.45)] backdrop-blur;
+}
+
+.hero-card {
+  @apply rounded-2xl border border-slate-700/80 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/90 p-6 shadow-[0_14px_44px_rgba(2,6,23,0.5)];
+}
+
+.section-intro {
+  @apply mb-4 rounded-xl border border-slate-700/70 bg-slate-900/45 p-4 text-sm text-slate-300;
+}
+
+.muted {
+  @apply text-slate-400;
 }
 
 .input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-accent-500 focus:ring-2;
+  @apply w-full rounded-xl border border-slate-700 bg-slate-900/65 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 ring-blue-500/70 transition focus:border-blue-500/70 focus:ring-2;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition duration-200;
 }
 
 .btn-primary {
-  @apply btn bg-gradient-to-r from-accent-500 to-blue-600 text-white hover:from-accent-600 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply btn bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.25)] hover:from-blue-400 hover:to-blue-500 hover:shadow-[0_0_22px_rgba(59,130,246,0.35)] disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply btn border border-slate-600 bg-slate-800/60 text-slate-200 hover:bg-slate-700/80 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-success {
+  @apply btn border border-emerald-500/40 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25;
+}
+
+.tab-btn {
+  @apply inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-700/70 hover:text-slate-100;
+}
+
+.tab-btn-active {
+  @apply border-blue-500/70 bg-blue-500/20 text-blue-100 shadow-[0_0_20px_rgba(59,130,246,0.28)];
 }
 
 .badge {
-  @apply inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-xs text-slate-700;
+  @apply inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2 py-1 text-xs text-slate-200;
+}
+
+.badge-success {
+  @apply inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-xs text-emerald-200;
+}
+
+.badge-warn {
+  @apply inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/15 px-2 py-1 text-xs text-amber-200;
+}
+
+.badge-danger {
+  @apply inline-flex items-center rounded-full border border-red-500/40 bg-red-500/15 px-2 py-1 text-xs text-red-200;
 }
 
 .spinner {
-  @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-accent-500;
+  @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-500 border-t-blue-400;
 }
 
 .progress-track {
-  @apply h-2 w-full overflow-hidden rounded-full bg-amber-100;
+  @apply h-2 w-full overflow-hidden rounded-full bg-slate-700;
 }
 
 .progress-fill {
-  @apply h-full animate-pulse rounded-full bg-gradient-to-r from-accent-500 via-blue-500 to-cyan-500 transition-[width] duration-300 ease-out;
+  @apply h-full rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-400 transition-[width] duration-300 ease-out;
+}
+
+.table-chip {
+  @apply rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm;
+}
+
+.divider {
+  @apply h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent;
 }

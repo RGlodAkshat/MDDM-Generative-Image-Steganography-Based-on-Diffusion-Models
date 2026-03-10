@@ -9,6 +9,12 @@ from pydantic import BaseModel, Field
 class ECCMode(str, Enum):
     none = "none"
     rep3 = "rep3"
+    hamming74 = "hamming74"
+
+
+class ExecutionMode(str, Enum):
+    demo = "demo"
+    custom = "custom"
 
 
 class AttackType(str, Enum):
@@ -23,8 +29,10 @@ class AttackType(str, Enum):
 
 
 class GenerateRequest(BaseModel):
-    prompt: str = Field(..., min_length=1)
-    hidden_message: str = Field(..., min_length=1)
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    prompt: Optional[str] = Field(default=None, min_length=1)
+    hidden_message: Optional[str] = Field(default=None, min_length=1)
     seed: Optional[int] = None
     num_steps: int = 30
     guidance_scale: float = 7.5
@@ -55,7 +63,9 @@ class GenerateResponse(BaseModel):
 
 
 class DecodeRequest(BaseModel):
-    image_id: str
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    image_id: Optional[str] = None
     prompt: Optional[str] = None
     num_steps: Optional[int] = None
     guidance_scale: Optional[float] = None
@@ -70,9 +80,11 @@ class DecodeResponse(BaseModel):
 
 
 class CompareRequest(BaseModel):
-    hidden_message: str = Field(..., min_length=1)
-    prompt_a: str = Field(..., min_length=1)
-    prompt_b: str = Field(..., min_length=1)
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    hidden_message: Optional[str] = Field(default=None, min_length=1)
+    prompt_a: Optional[str] = Field(default=None, min_length=1)
+    prompt_b: Optional[str] = Field(default=None, min_length=1)
     seed_a: Optional[int] = None
     seed_b: Optional[int] = None
     num_steps: int = 30
@@ -97,8 +109,10 @@ class CompareResponse(BaseModel):
 
 
 class AttackRequest(BaseModel):
-    image_id: str
-    attack_type: AttackType
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    image_id: Optional[str] = None
+    attack_type: Optional[AttackType] = None
     attack_strength: float = 1.0
 
 
@@ -112,8 +126,10 @@ class AttackResponse(BaseModel):
 
 
 class AttackDecodeRequest(BaseModel):
-    image_id: str
-    attack_type: AttackType
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    image_id: Optional[str] = None
+    attack_type: Optional[AttackType] = None
     attack_strength: float = 1.0
     prompt: Optional[str] = None
     num_steps: Optional[int] = None
@@ -134,10 +150,12 @@ class AttackDecodeResponse(BaseModel):
 
 
 class ProvenanceRequest(BaseModel):
-    prompt: str = Field(..., min_length=1)
-    experiment_id: str = Field(..., min_length=1)
-    team_name: str = Field(..., min_length=1)
-    date: str = Field(..., min_length=1)
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    prompt: Optional[str] = Field(default=None, min_length=1)
+    experiment_id: Optional[str] = Field(default=None, min_length=1)
+    team_name: Optional[str] = Field(default=None, min_length=1)
+    date: Optional[str] = Field(default=None, min_length=1)
     model_name: str = "runwayml/stable-diffusion-v1-5"
     notes: Optional[str] = None
     seed: Optional[int] = None
@@ -157,7 +175,9 @@ class ProvenanceResponse(BaseModel):
 
 
 class DecodeProvenanceRequest(BaseModel):
-    image_id: str
+    mode: ExecutionMode = ExecutionMode.custom
+    preset_id: Optional[str] = None
+    image_id: Optional[str] = None
     prompt: Optional[str] = None
     num_steps: Optional[int] = None
     guidance_scale: Optional[float] = None
