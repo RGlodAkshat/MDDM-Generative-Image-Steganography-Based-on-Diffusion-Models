@@ -22,7 +22,19 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--section", action="append", choices=sections(), help="Only generate image assets for this section.")
     parser.add_argument("--preset-id", action="append", help="Only generate assets for specific preset ID(s).")
-    parser.add_argument("--overwrite", action="store_true", help="Regenerate even if files already exist.")
+    parser.add_argument(
+        "--overwrite",
+        dest="overwrite",
+        action="store_true",
+        help="Regenerate image assets even if files already exist (default behavior).",
+    )
+    parser.add_argument(
+        "--skip-existing",
+        dest="overwrite",
+        action="store_false",
+        help="Skip image generation for presets that already have asset folders.",
+    )
+    parser.set_defaults(overwrite=True)
     return parser.parse_args()
 
 

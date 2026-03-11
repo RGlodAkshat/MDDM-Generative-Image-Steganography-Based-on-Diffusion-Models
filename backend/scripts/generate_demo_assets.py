@@ -44,6 +44,23 @@ def _select_presets(section_filters: List[str], preset_filters: List[str]) -> Li
     return presets
 
 
+def _log_generation_debug(
+    *,
+    preset: DemoPreset,
+    out: Dict[str, Any],
+    record: Dict[str, Any],
+    asset_dir: Path,
+    prompt: str,
+    seed: Optional[int],
+) -> None:
+    print(f"Preset: {preset.id}")
+    print(f"Prompt: {prompt}")
+    print(f"Seed: {seed}")
+    print(f"Generated image_id: {out.get('image_id')}")
+    print(f"Record image path: {record.get('image_path')}")
+    print(f"Target folder: {asset_dir}")
+
+
 def _encode_decode_preset(service: MDDMService, preset: DemoPreset, record_dir: Path, asset_dir: Path) -> None:
     out = service.generate(
         prompt=preset.prompt or "",
@@ -55,6 +72,14 @@ def _encode_decode_preset(service: MDDMService, preset: DemoPreset, record_dir: 
         ecc_mode=preset.ecc_mode,
     )
     record = load_record(record_dir, out["image_id"])
+    _log_generation_debug(
+        preset=preset,
+        out=out,
+        record=record,
+        asset_dir=asset_dir,
+        prompt=preset.prompt or "",
+        seed=int(out["seed"]),
+    )
     dec = service.decode(record)
 
     image_name = "image.png"
@@ -113,6 +138,22 @@ def _diversity_preset(service: MDDMService, preset: DemoPreset, record_dir: Path
 
     rec_a = load_record(record_dir, out_a["image_id"])
     rec_b = load_record(record_dir, out_b["image_id"])
+    _log_generation_debug(
+        preset=preset,
+        out=out_a,
+        record=rec_a,
+        asset_dir=asset_dir,
+        prompt=preset.prompt_a or "",
+        seed=int(out_a["seed"]),
+    )
+    _log_generation_debug(
+        preset=preset,
+        out=out_b,
+        record=rec_b,
+        asset_dir=asset_dir,
+        prompt=preset.prompt_b or "",
+        seed=int(out_b["seed"]),
+    )
     dec_a = service.decode(rec_a)
     dec_b = service.decode(rec_b)
 
@@ -174,6 +215,14 @@ def _tamper_preset(service: MDDMService, preset: DemoPreset, record_dir: Path, a
         ecc_mode=preset.ecc_mode,
     )
     record = load_record(record_dir, out["image_id"])
+    _log_generation_debug(
+        preset=preset,
+        out=out,
+        record=record,
+        asset_dir=asset_dir,
+        prompt=preset.prompt or "",
+        seed=int(out["seed"]),
+    )
 
     src_img = Image.open(record["image_path"]).convert("RGB")
     attacked_img = apply_attack(src_img, preset.attack_type or "jpeg", float(preset.attack_strength or 1.0))
@@ -230,6 +279,14 @@ def _provenance_preset(service: MDDMService, preset: DemoPreset, record_dir: Pat
         extra_metadata={"provenance": metadata},
     )
     record = load_record(record_dir, out["image_id"])
+    _log_generation_debug(
+        preset=preset,
+        out=out,
+        record=record,
+        asset_dir=asset_dir,
+        prompt=preset.prompt or "",
+        seed=int(out["seed"]),
+    )
     dec = service.decode(record)
 
     recovered_raw = dec["metrics"]["recovered_message"]
@@ -310,7 +367,19 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate preset-specific demo assets for MDDM demo mode.")
     parser.add_argument("--section", action="append", choices=sections(), help="Only generate presets from this section.")
     parser.add_argument("--preset-id", action="append", help="Generate only the provided preset ID(s).")
-    parser.add_argument("--overwrite", action="store_true", help="Regenerate even if target preset folder already exists.")
+    parser.add_argument(
+        "--overwrite",
+        dest="overwrite",
+        action="store_true",
+        help="Regenerate preset assets even if target folders already exist (default behavior).",
+    )
+    parser.add_argument(
+        "--skip-existing",
+        dest="overwrite",
+        action="store_false",
+        help="Skip generation for presets whose target folder already exists.",
+    )
+    parser.set_defaults(overwrite=True)
     return parser.parse_args()
 
 

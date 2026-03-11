@@ -70,12 +70,13 @@ export default function ProvenanceTab({ onNewImageId }: Props) {
   useEffect(() => {
     if (mode !== "demo" || !selectedPreset) return;
     const inputs = selectedPreset.inputs || {};
+    const meta = (inputs.metadata ?? {}) as Record<string, unknown>;
     setPrompt(String(inputs.prompt ?? ""));
-    setExperimentId(String(inputs.experiment_id ?? ""));
-    setTeamName(String(inputs.team_name ?? ""));
-    setDate(String(inputs.date ?? ""));
-    setModelName(String(inputs.model_name ?? ""));
-    setNotes(String(inputs.notes ?? ""));
+    setExperimentId(String(inputs.experiment_id ?? meta.experiment_id ?? ""));
+    setTeamName(String(inputs.team_name ?? meta.team_name ?? ""));
+    setDate(String(inputs.date ?? meta.date ?? ""));
+    setModelName(String(inputs.model_name ?? meta.model_name ?? ""));
+    setNotes(String(inputs.notes ?? meta.notes ?? ""));
     setErr(null);
   }, [mode, selectedPreset]);
 

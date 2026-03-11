@@ -10,10 +10,7 @@ __pycache__/
 *.jpeg
 *.gif
 *.webp
-!backend/demo_assets/
-!backend/demo_assets/**/*.png
-!backend/demo_assets/**/*.jpg
-!backend/demo_assets/**/*.jpeg
+backend/demo_assets/
 
 # Local data / artifacts
 mddm_extracted.txt
@@ -21,8 +18,12 @@ mddm_extracted.txt
 IE663 2026 Course Project Midterm Assessment Instructions.pdf
 IE663 Timeline Student Sheet.xlsx
 IE663_2026_Report_template/
+Mid-Term_Submission/
+SOTA_IE663_CourseProject_Midterm_Assessment/
 
 # Local app/runtime artifacts
+.venv/
+**/.venv/
 backend/.venv/
 backend/data/
 backend/__pycache__/
