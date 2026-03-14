@@ -30,7 +30,7 @@ export default function Page() {
       return <DiversityTab onNewImageId={setLatestImageId} />;
     }
     if (active === "Tamper Check") {
-      return <TamperTab latestImageId={latestImageId} />;
+      return <TamperTab />;
     }
     if (active === "Provenance") {
       return <ProvenanceTab onNewImageId={setLatestImageId} />;

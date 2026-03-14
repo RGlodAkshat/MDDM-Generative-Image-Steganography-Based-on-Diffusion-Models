@@ -11,10 +11,6 @@ import ProgressPanel from "@/components/ProgressPanel";
 import { api, imageUrl } from "@/lib/api";
 import type { AttackDecodeResponse, DemoPreset, ExecutionMode, MetricsPayload } from "@/lib/types";
 
-type Props = {
-  latestImageId: string | null;
-};
-
 const ATTACKS = [
   "jpeg",
   "resize",
@@ -37,12 +33,11 @@ const ATTACK_DESCRIPTIONS: Record<(typeof ATTACKS)[number], string> = {
   occlusion: "Crop / Occlusion: removes parts of the image, destroying some embedded bits.",
 };
 
-export default function TamperTab({ latestImageId }: Props) {
+export default function TamperTab() {
   const [mode, setMode] = useState<ExecutionMode>("demo");
   const [presets, setPresets] = useState<DemoPreset[]>([]);
   const [presetId, setPresetId] = useState("tamper_jpeg_q60");
 
-  const [imageId, setImageId] = useState(latestImageId || "");
   const [attackType, setAttackType] = useState<(typeof ATTACKS)[number]>("jpeg");
   const [strength, setStrength] = useState("0.6");
   const [res, setRes] = useState<AttackDecodeResponse | null>(null);
@@ -137,6 +132,10 @@ export default function TamperTab({ latestImageId }: Props) {
       : 260;
 
   const run = async () => {
+    if (mode === "custom" && !presetId) {
+      setErr("Custom Run requires a precomputed source preset image.");
+      return;
+    }
     setLoading(true);
     setErr(null);
     setRes(null);
@@ -150,7 +149,7 @@ export default function TamperTab({ latestImageId }: Props) {
             })
           : await api.attackDecode({
               mode: "custom",
-              image_id: imageId || latestImageId,
+              source_preset_id: presetId,
               attack_type: attackType,
               attack_strength: Number(strength),
             });
@@ -192,7 +191,12 @@ export default function TamperTab({ latestImageId }: Props) {
               <div className="badge-success">Loaded from preset asset: {presetId}</div>
             </>
           ) : (
-            <input className="input" placeholder="Image ID" value={imageId} onChange={(e) => setImageId(e.target.value)} />
+            <>
+              <PresetSelector presets={presets} value={presetId} onChange={setPresetId} label="Source Image Preset" />
+              <div className="badge">
+                Live attack source: precomputed original image from <code>{presetId}</code>
+              </div>
+            </>
           )}
 
           <div className="grid gap-3 md:grid-cols-2">
@@ -216,9 +220,13 @@ export default function TamperTab({ latestImageId }: Props) {
             <span className="font-medium">Attack explanation:</span> {ATTACK_DESCRIPTIONS[attackType]}
           </div>
 
-          {mode === "custom" ? <p className="text-xs text-slate-400">Tip: leave Image ID empty to use latest generated image.</p> : null}
+          {mode === "custom" ? (
+            <p className="text-xs text-slate-400">
+              Custom Run now uses a stable precomputed source image, then applies the selected attack and runs live inversion-based decoding on the attacked result.
+            </p>
+          ) : null}
 
-          <button className="btn-primary" disabled={loading || (mode === "custom" && !imageId && !latestImageId) || (mode === "demo" && !presetId)} onClick={run}>
+          <button className="btn-primary" disabled={loading || !presetId} onClick={run}>
             {loading ? "Running..." : mode === "demo" ? "Load Preset Attack Result" : "Run Attack Decode"}
           </button>
 

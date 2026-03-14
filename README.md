@@ -1,13 +1,13 @@
-﻿# IE 663 Course Project: MDDM Diffusion Steganography and Robustness Evaluation
+# IE 663 Course Project: MDDM Diffusion Steganography and Robustness Evaluation
 
 ## Authors / Course Information
-- Name: Akshat Kumar  
-- Roll Number: 22B4513  
-- Course Code: IE 663  
+- Name: Akshat Kumar
+- Roll Number: 22B4513
+- Course Code: IE 663
 - Course Name: IE 663 Course Project
 
 ## Project Description
-This project implements and evaluates **MDDM (Message-Driven Diffusion Model steganography)**.  
+This project implements and evaluates **MDDM (Message-Driven Diffusion Model steganography)**.
 The core idea is to hide a payload inside diffusion latent noise, generate an image, and later recover the hidden message through DDIM inversion.
 
 The repository contains:
@@ -16,26 +16,41 @@ The repository contains:
 - a Next.js frontend for interactive demonstrations.
 
 ## Running Instructions
-### 1. Environment Setup
-Use Python 3.10 for backend compatibility.
+### 1. Prerequisites
+- Python `3.10` (recommended for backend stack compatibility)
+- Node.js `18+` and npm
+- CUDA-capable GPU strongly recommended for live pipeline runs
+
+### 2. Clone and move to project root
+
+```bash
+git clone https://github.com/RGlodAkshat/MDDM-Generative-Image-Steganography-Based-on-Diffusion-Models.git
+cd MDDM-Generative-Image-Steganography-Based-on-Diffusion-Models
+```
+
+### 3. Backend environment setup
 
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate
-```
-
-### 2. Backend Setup and Run
-From project root:
-
-```bash
 cd backend
 pip install -r requirements.txt
 cd ..
+```
+
+### 4. Run backend (recommended from project root)
+
+```bash
 uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Frontend Setup and Run
-In a separate terminal:
+Alternative when your shell is already inside `backend/`:
+
+```bash
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 5. Run frontend (new terminal)
 
 ```bash
 cd frontend
@@ -45,12 +60,30 @@ npm run dev
 
 Frontend runs on `http://localhost:3000` and communicates with backend REST endpoints (`http://localhost:8000` by default).
 
-### 4. Running the Notebook
+### 6. Running the notebook
 Open `model.ipynb` in Jupyter/VS Code and run top-to-bottom for full reproduction.
 
 GPU note:
 - Stable Diffusion generation/inversion is practical with CUDA GPU.
 - CPU mode works but can be very slow (minutes per generation/inversion run).
+
+### 7. Demo mode assets (optional but recommended for presentation)
+Demo Mode in the web app reads from precomputed assets. Regenerate or verify using:
+
+```bash
+python backend/scripts/generate_demo_assets.py --overwrite
+python backend/scripts/verify_demo_assets.py
+```
+
+### 8. Quick health checks
+- Backend: open `http://localhost:8000/health`
+- Frontend: open `http://localhost:3000`
+- Production frontend check:
+
+```bash
+cd frontend
+npm run build
+```
 
 ## Overview of MDDM
 Diffusion models synthesize images by gradually denoising latent noise into a final image.
@@ -82,33 +115,33 @@ Why this matters:
 ## Project Structure
 ```text
 .
-├── model.ipynb
-├── mddm_extracted.txt
-├── README.md
-├── DEMO_APP_README.md
-├── backend/
-│   ├── app.py
-│   ├── pipeline.py
-│   ├── attacks.py
-│   ├── metrics.py
-│   ├── schemas.py
-│   ├── utils.py
-│   └── requirements.txt
-└── frontend/
-    ├── app/
-    │   ├── page.tsx
-    │   ├── layout.tsx
-    │   └── globals.css
-    ├── components/
-    │   ├── EncodeDecodeTab.tsx
-    │   ├── DiversityTab.tsx
-    │   ├── TamperTab.tsx
-    │   ├── ProvenanceTab.tsx
-    │   ├── AboutTab.tsx
-    │   └── ProgressPanel.tsx
-    └── lib/
-        ├── api.ts
-        └── types.ts
++-- model.ipynb
++-- mddm_extracted.txt
++-- README.md
++-- DEMO_APP_README.md
++-- backend/
+�   +-- app.py
+�   +-- pipeline.py
+�   +-- attacks.py
+�   +-- metrics.py
+�   +-- schemas.py
+�   +-- utils.py
+�   +-- requirements.txt
++-- frontend/
+    +-- app/
+    �   +-- page.tsx
+    �   +-- layout.tsx
+    �   +-- globals.css
+    +-- components/
+    �   +-- EncodeDecodeTab.tsx
+    �   +-- DiversityTab.tsx
+    �   +-- TamperTab.tsx
+    �   +-- ProvenanceTab.tsx
+    �   +-- AboutTab.tsx
+    �   +-- ProgressPanel.tsx
+    +-- lib/
+        +-- api.ts
+        +-- types.ts
 ```
 
 Component roles:
@@ -118,7 +151,7 @@ Component roles:
 
 ## Evaluation Experiments
 ### Payload vs Accuracy Test
-Measures how payload length affects recovery.  
+Measures how payload length affects recovery.
 Higher payload uses more embedding capacity and generally increases sensitivity to inversion noise, which can increase BER.
 
 ### Robustness Stress Test
@@ -147,7 +180,7 @@ Representative notebook outputs show:
 - **Payload vs Accuracy**: BER remained low overall; worst observed BER was `0.007812` at `512` bits in one run.
 - **Robustness**: strongest failure mode was rotation (`rotation_3deg`) with BER around `0.433594`; JPEG at low quality introduced smaller but non-zero BER.
 - **Prompt Diversity**: message recovery remained high across visually diverse outputs (mean bit accuracy about `0.998` in recorded runs).
-- **Inversion Sensitivity**: wrong prompt increased BER (e.g., `0.003906`), while correct/blank prompt settings were often near perfect in these runs.
+- **Inversion Sensitivity**: wrong prompt increased BER (for example, `0.003906`), while correct/blank prompt settings were often near perfect in these runs.
 - **Runtime**: generation and inversion dominate compute, while embedding/decoding are lightweight.
 
 These observations align with expected MDDM behavior: the method is accurate under matched conditions, but robustness degrades under strong geometric/transform attacks.
@@ -155,20 +188,24 @@ These observations align with expected MDDM behavior: the method is accurate und
 ## Demo Application
 The web demo provides an interactive way to showcase the method and evaluation ideas:
 
-- **Encode & Decode**  
+- **Encode & Decode**
   Embed a hidden message in generation, then decode and report BER/accuracy.
 
-- **Diversity Test**  
+- **Diversity Test**
   Generate different images (different prompt/seed) with the same payload and compare recovery.
 
-- **Tamper Check**  
+- **Tamper Check**
   Apply distortions, decode from attacked images, and observe robustness degradation.
 
-- **Provenance**  
+- **Provenance**
   Embed structured metadata (experiment ID, team, date, model) and recover it later.
 
-- **About / Method**  
+- **About / Method**
   Concise explanation of MDDM mechanism and evaluation metrics.
+
+Execution modes:
+- `Demo Mode`: instant precomputed preset results.
+- `Custom Run`: live diffusion/inversion pipeline.
 
 ## Key Achievements
 - Implemented a complete end-to-end MDDM steganography pipeline.
@@ -178,6 +215,14 @@ The web demo provides an interactive way to showcase the method and evaluation i
 - Tested resilience under multiple realistic image distortions.
 - Developed an interactive local demo application (FastAPI + Next.js).
 - Measured and analyzed BER, payload behavior, inversion sensitivity, and runtime bottlenecks.
+
+## Troubleshooting
+- `ModuleNotFoundError: No module named 'backend'`
+  - Run `uvicorn backend.app:app ...` from project root, or `uvicorn app:app ...` from inside `backend/`.
+- Next.js cache errors like `Cannot find module './819.js'`
+  - In `frontend/`, run `npm run clean`, then `npm run dev`.
+- Very slow generation/inversion
+  - Check backend logs for CUDA availability; CPU mode is much slower.
 
 ## Citation
 If you use this implementation, please cite the original MDDM paper and acknowledge this course project repository.

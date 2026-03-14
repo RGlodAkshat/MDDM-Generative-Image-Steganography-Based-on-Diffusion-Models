@@ -13,6 +13,7 @@ from PIL import Image
 
 from .attacks import apply_attack
 from .demo_loader import DemoAssetError, DemoFileError, DemoLoader, DemoPresetError, DemoSectionError
+from .metrics import ecc_encode, text_to_bits
 from .pipeline import MDDMService
 from .schemas import (
     AttackDecodeRequest,
@@ -85,6 +86,62 @@ def _require_preset_id(preset_id: Optional[str], route_name: str) -> str:
     if not preset_id:
         raise DemoPresetError(f"Demo mode requires 'preset_id' for {route_name}")
     return preset_id
+
+
+def _demo_asset_path_from_url(image_url: str) -> Path:
+    prefix = "/demo_assets/"
+    if not image_url.startswith(prefix):
+        raise DemoFileError(f"Expected demo asset URL starting with '{prefix}', got '{image_url}'")
+    local_path = DEMO_ASSETS_DIR / image_url.removeprefix(prefix)
+    if not local_path.exists():
+        raise DemoFileError(f"Missing demo asset file: {local_path}")
+    return local_path
+
+
+def _build_tamper_source_record(source_preset_id: str) -> Dict[str, Any]:
+    payload = demo_loader.load_results("tamper", source_preset_id)
+    inputs = payload.get("inputs", {})
+    block = payload.get("attack_decode_response", {})
+    if not isinstance(inputs, dict) or not isinstance(block, dict):
+        raise DemoFileError(f"Tamper preset '{source_preset_id}' is missing required source metadata")
+
+    hidden_message = str(inputs.get("hidden_message", "") or "")
+    prompt = str(inputs.get("prompt", "") or "")
+    if not hidden_message or not prompt:
+        raise DemoFileError(f"Tamper preset '{source_preset_id}' must provide prompt and hidden_message")
+
+    seed = int(inputs.get("seed", 0) or 0)
+    ecc_mode = str(inputs.get("ecc_mode", "none") or "none")
+    num_steps = int(inputs.get("num_steps", 30) or 30)
+    guidance_scale = float(inputs.get("guidance_scale", 7.5) or 7.5)
+    negative_prompt = inputs.get("negative_prompt")
+
+    payload_bits = text_to_bits(hidden_message)
+    encoded_bits, _ = ecc_encode(payload_bits, mode=ecc_mode)
+    cg = service.generate_cardan_grille(4 * 64 * 64, len(encoded_bits), seed=seed)
+
+    image_url = str(block.get("source_image_url", ""))
+    image_path = _demo_asset_path_from_url(image_url)
+    image_id = f"presetsrc_{source_preset_id}"
+    record = {
+        "image_id": image_id,
+        "image_path": str(image_path),
+        "image_url": image_url,
+        "prompt": prompt,
+        "negative_prompt": negative_prompt,
+        "seed": seed,
+        "num_steps": num_steps,
+        "guidance_scale": guidance_scale,
+        "ecc_mode": ecc_mode,
+        "payload_text": hidden_message,
+        "payload_bits": payload_bits,
+        "encoded_bits": encoded_bits,
+        "cg": cg.tolist(),
+        "metadata": {"source_preset_id": source_preset_id, "source": "demo_tamper_preset"},
+        "created_at": time.time(),
+    }
+    save_record(paths["records"], image_id, record)
+    return record
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -240,12 +297,16 @@ def attack(req: AttackRequest) -> AttackResponse:
         except Exception as exc:
             raise _handle_demo_error(exc) from exc
 
-    image_id = _require_str(req.image_id, "image_id")
     if req.attack_type is None:
         raise _http_422("Missing required field for custom mode: 'attack_type'")
 
     try:
-        record = load_record(paths["records"], image_id)
+        if req.source_preset_id:
+            record = _build_tamper_source_record(req.source_preset_id)
+            image_id = record["image_id"]
+        else:
+            image_id = _require_str(req.image_id, "image_id")
+            record = load_record(paths["records"], image_id)
         src_img = Image.open(record["image_path"]).convert("RGB")
         attacked_img = apply_attack(src_img, req.attack_type.value, req.attack_strength)
 
@@ -291,15 +352,21 @@ def attack_decode(req: AttackDecodeRequest) -> AttackDecodeResponse:
         except Exception as exc:
             raise _handle_demo_error(exc) from exc
 
-    image_id = _require_str(req.image_id, "image_id")
     if req.attack_type is None:
         raise _http_422("Missing required field for custom mode: 'attack_type'")
 
     start = time.perf_counter()
+    if req.source_preset_id:
+        source_record = _build_tamper_source_record(req.source_preset_id)
+        image_id = source_record["image_id"]
+    else:
+        image_id = _require_str(req.image_id, "image_id")
+        source_record = None
     attack_out = attack(
         AttackRequest(
             mode=ExecutionMode.custom,
             image_id=image_id,
+            source_preset_id=req.source_preset_id,
             attack_type=req.attack_type,
             attack_strength=req.attack_strength,
         )

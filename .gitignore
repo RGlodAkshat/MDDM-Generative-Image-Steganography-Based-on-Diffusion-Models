@@ -27,6 +27,8 @@ SOTA_IE663_CourseProject_Midterm_Assessment/
 backend/.venv/
 backend/data/
 backend/__pycache__/
+/node_modules/
+/package-lock.json
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local

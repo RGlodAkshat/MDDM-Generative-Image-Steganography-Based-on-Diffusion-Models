@@ -111,6 +111,7 @@ class CompareResponse(BaseModel):
 class AttackRequest(BaseModel):
     mode: ExecutionMode = ExecutionMode.custom
     preset_id: Optional[str] = None
+    source_preset_id: Optional[str] = None
     image_id: Optional[str] = None
     attack_type: Optional[AttackType] = None
     attack_strength: float = 1.0
@@ -128,6 +129,7 @@ class AttackResponse(BaseModel):
 class AttackDecodeRequest(BaseModel):
     mode: ExecutionMode = ExecutionMode.custom
     preset_id: Optional[str] = None
+    source_preset_id: Optional[str] = None
     image_id: Optional[str] = None
     attack_type: Optional[AttackType] = None
     attack_strength: float = 1.0

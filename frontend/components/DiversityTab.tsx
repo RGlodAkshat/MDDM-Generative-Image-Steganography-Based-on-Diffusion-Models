@@ -123,7 +123,9 @@ export default function DiversityTab({ onNewImageId }: Props) {
       if (mode === "custom") {
         setRuntimeHistory((prev) => [...prev.slice(-4), out.runtime_s]);
       }
-      out.items.forEach((it) => onNewImageId(it.image_id));
+      if (mode === "custom") {
+        out.items.forEach((it) => onNewImageId(it.image_id));
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Compare failed");
     } finally {

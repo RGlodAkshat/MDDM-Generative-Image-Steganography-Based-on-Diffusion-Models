@@ -155,7 +155,9 @@ export default function EncodeDecodeTab({ onNewImageId }: Props) {
       if (mode === "custom") {
         setGenRuntimeHistory((prev) => [...prev.slice(-4), out.runtime_s]);
       }
-      onNewImageId(out.image_id);
+      if (mode === "custom") {
+        onNewImageId(out.image_id);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Generation failed");
     } finally {
