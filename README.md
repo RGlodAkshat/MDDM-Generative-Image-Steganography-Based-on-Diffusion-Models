@@ -1,4 +1,4 @@
-# IE 663 Course Project: MDDM Diffusion Steganography and Robustness Evaluation
+ï»¿# IE 663 Course Project: MDDM Diffusion Steganography and Robustness Evaluation
 
 ## Authors / Course Information
 - Name: Akshat Kumar
@@ -28,15 +28,17 @@ git clone https://github.com/RGlodAkshat/MDDM-Generative-Image-Steganography-Bas
 cd MDDM-Generative-Image-Steganography-Based-on-Diffusion-Models
 ```
 
-### 3. Backend environment setup
+### 3. Python environment setup (backend + notebook)
 
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate
-cd backend
 pip install -r requirements.txt
-cd ..
 ```
+
+Notes:
+- Root `requirements.txt` installs backend runtime + notebook/research dependencies.
+- If you only want backend deps, use `pip install -r backend/requirements.txt`.
 
 ### 4. Run backend (recommended from project root)
 
@@ -119,26 +121,27 @@ Why this matters:
 +-- mddm_extracted.txt
 +-- README.md
 +-- DEMO_APP_README.md
++-- requirements.txt
 +-- backend/
-¦   +-- app.py
-¦   +-- pipeline.py
-¦   +-- attacks.py
-¦   +-- metrics.py
-¦   +-- schemas.py
-¦   +-- utils.py
-¦   +-- requirements.txt
+Â¦   +-- app.py
+Â¦   +-- pipeline.py
+Â¦   +-- attacks.py
+Â¦   +-- metrics.py
+Â¦   +-- schemas.py
+Â¦   +-- utils.py
+Â¦   +-- requirements.txt
 +-- frontend/
     +-- app/
-    ¦   +-- page.tsx
-    ¦   +-- layout.tsx
-    ¦   +-- globals.css
+    Â¦   +-- page.tsx
+    Â¦   +-- layout.tsx
+    Â¦   +-- globals.css
     +-- components/
-    ¦   +-- EncodeDecodeTab.tsx
-    ¦   +-- DiversityTab.tsx
-    ¦   +-- TamperTab.tsx
-    ¦   +-- ProvenanceTab.tsx
-    ¦   +-- AboutTab.tsx
-    ¦   +-- ProgressPanel.tsx
+    Â¦   +-- EncodeDecodeTab.tsx
+    Â¦   +-- DiversityTab.tsx
+    Â¦   +-- TamperTab.tsx
+    Â¦   +-- ProvenanceTab.tsx
+    Â¦   +-- AboutTab.tsx
+    Â¦   +-- ProgressPanel.tsx
     +-- lib/
         +-- api.ts
         +-- types.ts

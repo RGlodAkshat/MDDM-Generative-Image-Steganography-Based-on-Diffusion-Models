@@ -1,0 +1,8 @@
+-r backend/requirements.txt
+
+# Notebook/research workflow dependencies
+ipython==8.32.0
+matplotlib==3.10.1
+pandas==2.2.3
+tqdm==4.67.1
+notebook==7.4.5
